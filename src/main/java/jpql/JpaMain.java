@@ -17,28 +17,29 @@ public class JpaMain {
         tx.begin();
 
         try {
+            Team team = new Team();
+            team.setName("teamA");
 
-            for (int i=0; i<100; i++) {
-                Member member = new Member();
-                member.setUsername("member" + i);
-                member.setAge(i);
-                em.persist(member);
-            }
+            Member member = new Member();
+            member.setUsername("member1");
+            member.setAge(10);
+            member.setTeam(team);
+
+            em.persist(team);
+            em.persist(member);
 
             em.flush();
             em.clear();
 
-            List<Member> members = em.createQuery("select m from Member m order by m.age desc", Member.class)
-                    .setFirstResult(0)
-                    .setMaxResults(10)
-                    .getResultList();
+            String query =
+                    "select " +
+                            "case when m.age <= 10 then '학생요금' " +
+                            "     when m.age >= 60 then '경로요금' " +
+                            "     else '일반요금'" +
+                            "end " +
+                    "from Member m";
 
-            System.out.println("members.size = " + members.size());
-
-            for (Member member1 : members) {
-                System.out.println("member1 = " + member1);
-            }
-
+            em.createQuery(query, Member.class).getResultList();
 
             tx.commit();
         } catch (Exception e) {
