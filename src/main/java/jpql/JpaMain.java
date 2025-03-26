@@ -17,29 +17,44 @@ public class JpaMain {
         tx.begin();
 
         try {
-            Team team = new Team();
-            team.setName("teamA");
+            Team teamA = new Team();
+            teamA.setName("teamA");
 
-            Member member = new Member();
-            member.setUsername("member1");
-            member.setAge(10);
-            member.setTeam(team);
+            Team teamB = new Team();
+            teamB.setName("teamB");
 
-            em.persist(team);
-            em.persist(member);
+            em.persist(teamA);
+            em.persist(teamB);
+
+            Member member1 = new Member();
+            member1.setUsername("member1");
+            member1.setAge(10);
+            member1.setTeam(teamA);
+
+            Member member2 = new Member();
+            member2.setUsername("member2");
+            member2.setAge(10);
+            member2.setTeam(teamA);
+
+            Member member3 = new Member();
+            member3.setUsername("member3");
+            member3.setAge(10);
+            member3.setTeam(teamB);
+
+            em.persist(member1);
+            em.persist(member2);
+            em.persist(member3);
 
             em.flush();
             em.clear();
 
-            String query =
-                    "select " +
-                            "case when m.age <= 10 then '학생요금' " +
-                            "     when m.age >= 60 then '경로요금' " +
-                            "     else '일반요금'" +
-                            "end " +
-                    "from Member m";
+            List<Member> members = em.createNamedQuery("Member.findByUsername", Member.class)
+                    .setParameter("username", "member3")
+                    .getResultList();
 
-            em.createQuery(query, Member.class).getResultList();
+            for (Member member : members) {
+                System.out.println("member = " + member);
+            }
 
             tx.commit();
         } catch (Exception e) {
